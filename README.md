@@ -12,7 +12,8 @@ and the pane follows along.
 ## Features
 
 - **Split editor + preview.** The source side has syntax highlighting (markdown and fenced code).
-  The preview highlights the block under your caret and scrolls to it.
+  The preview highlights the block under your caret and scrolls to it. Scrolling either side
+  (wheel or scrollbar) scrolls the other to the same point.
 - **Three views:** `split`, `edit`, and `preview`. Preview is a read-only reader with
   `j`/`k`/`space`/`g`/`G` scrolling.
 - **Live reload.** When the file changes on disk, a clean buffer reloads itself. A buffer with

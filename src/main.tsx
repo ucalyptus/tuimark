@@ -10,6 +10,7 @@ import { highlightMarkdown } from "./highlight";
 import type { EditorPalette } from "./highlight";
 
 type View = "split" | "edit" | "preview";
+type Pane = "editor" | "preview";
 const VIEWS: View[] = ["split", "edit", "preview"];
 
 // bin/tuimark.mjs passes: <absolute file or directory> <view>
@@ -91,10 +92,14 @@ function App() {
   const [mono, setMono] = useState<number>();
 
   const inputRef = useRef<NodeHandle>(null);
+  const editorRef = useRef<NodeHandle>(null);
   const previewRef = useRef<NodeHandle>(null);
   const bodyRef = useRef<NodeHandle>(null);
   const bodyRect = useRect(bodyRef);
-  const previewScroll = useRef<ScrollEvent>({ offset: 0, max: 0 });
+  // A pane's max is only known once it has scrolled; 1e9 lets the engine clamp the first sync to the real max.
+  const scrolls = useRef<Record<Pane, ScrollEvent>>({ editor: { offset: 0, max: 1e9 }, preview: { offset: 0, max: 1e9 } });
+  const leader = useRef<Pane>("editor");
+  const syncRatio = useRef<number | null>(null);
   const dragFrom = useRef(0);
   const quitArmed = useRef(false);
   const discardArmed = useRef<string | null>(null);
@@ -194,6 +199,7 @@ function App() {
     setCursor(0);
     setDiskChanged(false);
     previewRef.current?.scrollTo(0);
+    editorRef.current?.scrollTo(0);
   };
 
   const save = () => {
@@ -238,8 +244,25 @@ function App() {
   };
 
   const scrollPreview = (delta: number) => {
-    const { offset, max } = previewScroll.current;
+    const { offset, max } = scrolls.current.preview;
     previewRef.current?.scrollTo(Math.max(0, Math.min(max, offset + delta)), true);
+  };
+
+  // In split view the pane under the pointer leads and the other follows at the same fraction of its
+  // scroll range. A follower's first event after a sync carries its fresh max, so it corrects itself once.
+  const onPaneScroll = (pane: Pane, event: ScrollEvent) => {
+    scrolls.current[pane] = event;
+    if (view !== "split") return;
+    const other: Pane = pane === "editor" ? "preview" : "editor";
+    const otherRef = other === "editor" ? editorRef : previewRef;
+    if (pane === leader.current) {
+      syncRatio.current = event.max > 0 ? event.offset / event.max : 0;
+      otherRef.current?.scrollTo(syncRatio.current * scrolls.current[other].max);
+    } else if (syncRatio.current !== null) {
+      const want = syncRatio.current * event.max;
+      syncRatio.current = null;
+      if (Math.abs(event.offset - want) > 1) (pane === "editor" ? editorRef : previewRef).current?.scrollTo(want);
+    }
   };
 
   useEffect(() => {
@@ -401,7 +424,13 @@ function App() {
         )}
 
         <Box ref={bodyRef} style={{ flexGrow: 1, flexBasis: 0, alignItems: "stretch" }}>
-          <Box hidden={!showEditor} style={{ width: `${editorPct}%`, flexShrink: 0, flexDirection: "column", alignItems: "stretch" }}>
+          <Box
+            ref={editorRef}
+            hidden={!showEditor}
+            onScroll={(event) => onPaneScroll("editor", event)}
+            onMouseEnter={() => (leader.current = "editor")}
+            style={{ width: `${editorPct}%`, flexShrink: 0, flexDirection: "column", alignItems: "stretch", overflow: "scroll" }}
+          >
             <Input
               key={`${doc.file}\0${doc.rev}`}
               ref={inputRef}
@@ -446,9 +475,8 @@ function App() {
           <Box
             ref={previewRef}
             hidden={!showPreview}
-            onScroll={(event) => {
-              previewScroll.current = event;
-            }}
+            onScroll={(event) => onPaneScroll("preview", event)}
+            onMouseEnter={() => (leader.current = "preview")}
             style={{
               flexGrow: 1,
               flexBasis: 0,
