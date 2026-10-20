@@ -29,6 +29,12 @@ and the pane follows along.
   Warp. herdr and tmux work as multiplexers on top of these.
 - Node.js ≥ 20, on macOS or Linux.
 
+**herdr:** pixel draws through herdr's graphics support, which is off by default. The first time
+tuimark runs inside herdr, pixel turns on `kitty_graphics = true` in `~/.config/herdr/config.toml`.
+herdr only reads that setting when a client attaches, so detach (`prefix+q`, default `ctrl+b q`)
+and run `herdr` again once. Until you do, the tuimark pane stays blank, and
+`pane.graphics.info` reports `cell_size_unavailable`.
+
 ## Install
 
 ```sh
