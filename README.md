@@ -91,6 +91,16 @@ The extension adds:
 
 omp has to be running inside herdr or tmux for this to work.
 
+## Agent skill
+
+`skills/tuimark/SKILL.md` is an agent skill. It tells a coding agent how to open tuimark next
+to itself (omp tool, herdr, tmux, or cmux), how to avoid overwriting your unsaved edits, and how
+to fix blank or ghosting panes. Link it into your agent's skills directory:
+
+```sh
+ln -s "$PWD/skills/tuimark" ~/.agents/skills/tuimark    # or ~/.claude/skills/tuimark
+```
+
 ## How it works
 
 `bin/tuimark.mjs` checks the arguments in the plain terminal. It then runs `pixel`, which starts

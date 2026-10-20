@@ -13,7 +13,7 @@
   "bin": {
     "tuimark": "bin/tuimark.mjs"
   },
-  "files": ["bin", "dist", "omp"],
+  "files": ["bin", "dist", "omp", "skills"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepare": "tsc -p tsconfig.json",
