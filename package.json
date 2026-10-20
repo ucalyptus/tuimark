@@ -1,0 +1,46 @@
+{
+  "name": "tuimark",
+  "version": "0.1.0",
+  "description": "Markdown editor and live preview for graphics terminals, built on pixel",
+  "license": "MIT",
+  "author": "ucalyptus <sdas.codes@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ucalyptus/tuimark.git"
+  },
+  "keywords": ["markdown", "editor", "tui", "terminal", "pixel", "kitty-graphics", "cmux", "herdr"],
+  "main": "dist/main.js",
+  "bin": {
+    "tuimark": "bin/tuimark.mjs"
+  },
+  "files": ["bin", "dist", "omp"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "tsc -p tsconfig.json",
+    "start": "npm run build && node bin/tuimark.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@zenbu-labs/pixel": "^0.2.6",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.0",
+    "typescript": "^5.5.0"
+  },
+  "trustedDependencies": [
+    "@zenbu-labs/pixel"
+  ],
+  "allowScripts": {
+    "@zenbu-labs/pixel": true
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@zenbu-labs/pixel"
+    ]
+  }
+}
