@@ -14,10 +14,10 @@ type View = (typeof VIEWS)[number];
 
 function launchRequest(args: string[], cwd: string, focus: boolean): { where: string; request: Record<string, unknown> } {
 	if (process.env.HERDR_PANE_ID) {
-		// Herdr types the command into the new pane's shell (zsh); `exec` closes the pane when tuimark quits.
+		// omp runs the command from a /bin/sh script typed into the new pane's shell; closing the pane after tuimark quits keeps it from lingering.
 		return {
 			where: "herdr pane",
-			request: { multiplexer: "herdr", placement: "pane", command: ["exec", "tuimark", ...args], cwd, focus, shellGrammar: "posix" },
+			request: { multiplexer: "herdr", placement: "pane", command: ["sh", "-c", 'tuimark "$@"; herdr pane close "$HERDR_PANE_ID"', "tuimark", ...args], cwd, focus },
 		};
 	}
 	if (process.env.TMUX) {
